@@ -1,13 +1,9 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
-```{r, echo=TRUE}
+
+```r
 #Data file is here in my local repo clone:
 # /Users/Kurt/DataScience/datasciencecoursera/RepData_PeerAssessment1
 
@@ -26,6 +22,10 @@ unzip(fileURL, exdir = newWD, overwrite=TRUE)
 #read data
 activityDataRaw <- read.csv("activity.csv")
 dim(activityDataRaw) # This is to confirm we have the expected data
+```
+
+```
+## [1] 17568     3
 ```
 
 ## What is mean total number of steps taken per day?
