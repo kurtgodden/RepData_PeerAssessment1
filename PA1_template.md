@@ -168,9 +168,8 @@ intervalMeanSteps[indexOfmaxMeanStepInterval[[1]]]
 ## 206.1698
 ```
 
-I.e. this is correct.
-So the answer to question 2 is that interval 835, on average, has the 
-highest number of steps: 206.1698
+I.e. this is correct. So the answer to question 2 is that interval 835, 
+on average, has the highest number of steps: 206.1698
 
 ## Imputing missing values
 
@@ -211,7 +210,11 @@ summary(activityDataRaw)
 ```
 I decided to round the mean for each 5-min interval to the nearest whole number
 e.g. for interval 1840, the mean is 85.33962, so the round() of that is 85,
-which comes from round(intervalMeanSteps[["1840"]])
+which comes from round(intervalMeanSteps[["1840"]]). To implement this
+strategy I define a function 'fillInNA' that takes a data frame (which will be
+called with the activityDataRaw) and an array of indices indicating the rows
+in the data frame that contain NA values.  This function returns the
+imputed, or 'filled' in data which I save in variable 'activityDataFilled'.
 
 
 ```r
@@ -233,7 +236,13 @@ fillInNA <- function(df, indices) {
 }
 
 activityDataFilled <- fillInNA(activityDataRaw, indicesOfNA)
+```
+We will now use this new data frame, activityDataFilled, to plot a new
+histogram and then compare that to the histogram made on the original
+data frame with NA values.
 
+
+```r
 # 4. Make a histogram of the total number of steps taken each day and Calculate 
 #    and report the mean and median total number of steps taken per day. 
 #    Do these values differ from the estimates from the first part of the assignment? 
@@ -248,10 +257,16 @@ hist(dailyStepsFilled, main="Histogram of Daily Step Totals (filled NAs)",
      xlab="Total Daily Steps (filled NAs)", col="blue", ylim=c(0, 40))
 ```
 
-![](PA1_template_files/figure-html/FillInNAs-1.png) 
+![](PA1_template_files/figure-html/histogramUsingFilledData-1.png) 
+
+Notice how the shape of this histogram is VERY different compared to the first 
+that used the raw data.  Also quite different is the absolute height of the 
+historgram bars, as would be expected since this new filled data frame 
+contains more data.
+
 
 ```r
-#Instructions: Calculate and report the mean and median 
+#Instructions from question 4: Calculate and report the mean and median 
 #of the total number of steps taken per day
 meanDailyStepsFilled <- mean(dailyStepsFilled)
 medianDailyStepsFilled <- median(dailyStepsFilled)
@@ -267,22 +282,17 @@ text(y=c(meanDailyStepsFilled, medianDailyStepsFilled),
      x=mmPlotFilled, 
      pos=3, #Place data labels above the bars
      labels=as.character(c(round(meanDailyStepsFilled, digits=1), 
-                           medianDailySteps)))
+                           medianDailyStepsFilled)))
 ```
 
-![](PA1_template_files/figure-html/FillInNAs-2.png) 
+![](PA1_template_files/figure-html/meanAndMedianFilled-1.png) 
 
-```r
-# Now notice how, with filled NA data, the mean and median are nearly identical
+Now using the imputed data, notice how the mean and median are nearly identical.
 
-#Obviously, imputing the missing values indeed makes a huge difference
-#in the graph compared to the raw numbers.  With imputed values, 
-#the mean and median are nearly identical, whereas with the raw data
-#the difference was almost 1041 steps.  
-#And also the shape of the 2 histograms is VERY different in raw vs. imputed,
-#as is the absolute height of the bars (which would be expected).
-```
-
+Obviously, imputing the missing values indeed makes a huge difference
+in the graph compared to the raw numbers.  With imputed values, 
+the mean and median are nearly identical, whereas with the raw data
+the difference was almost 1041 steps.  
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -297,14 +307,19 @@ text(y=c(meanDailyStepsFilled, medianDailyStepsFilled),
 #    in the GitHub repository to see an example of what this plot should look 
 #    like using simulated data.
 
+#define fn to return Boolean vector where T means weekend
 isWeekend <- function(dateAsCharacter) {
+    # dateAsCharacter is a vector of character dates
                 weekdays(as.Date(dateAsCharacter)) %in% c("Saturday", "Sunday")
                 }
+# get weekend vector of all dates based on the imputed dataset
 is.weekend <- isWeekend(activityDataFilled$date)
 
+#replace T with 'weekend' and F with 'weekday'
 is.weekend[is.weekend==TRUE] <- "weekend"
 is.weekend[is.weekend==FALSE] <- "weekday"
         
+#add new 2-level factor variable for weekend/weekday
 activityDataFilled$TypeOfDay <- as.factor(is.weekend)
 
 # Now make the panel plot and I'll use ggplot2
